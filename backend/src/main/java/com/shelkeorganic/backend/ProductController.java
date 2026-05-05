@@ -1,4 +1,4 @@
-package com.shelkeorganic;
+package com.shelkeorganic.backend;
 
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
