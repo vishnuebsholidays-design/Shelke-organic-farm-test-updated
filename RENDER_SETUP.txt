@@ -1,0 +1,35 @@
+RENDER DEPLOYMENT SETTINGS
+
+1) Backend (Node API)
+Create: New + > Web Service
+Root Directory: node-backend
+Build Command: npm install
+Start Command: npm start
+
+Environment Variables to add in Render backend:
+ADMIN_KEY=admin123
+FRONTEND_URL=https://your-frontend-name.onrender.com
+DB_HOST=your-mysql-host
+DB_PORT=3306
+DB_USER=your-mysql-user
+DB_PASSWORD=your-mysql-password
+DB_NAME=shelke_store
+DB_SSL=true   (use true only if your MySQL provider requires SSL)
+RAZORPAY_KEY_ID=rzp_test_SknBkvw7NxAjJH
+RAZORPAY_KEY_SECRET=your Razorpay test secret
+
+Health check after deploy:
+https://your-backend-name.onrender.com/health
+
+2) Frontend (React/Vite)
+Create: New + > Static Site
+Root Directory: frontend
+Build Command: npm install && npm run build
+Publish Directory: dist
+
+Environment Variables to add in Render frontend:
+VITE_API_URL=https://your-backend-name.onrender.com
+
+3) Important
+Do not upload node_modules, .env, frontend/dist, backend/target, or .git to GitHub.
+Localhost database will not work on Render. You must use a hosted MySQL database and put its details in Render environment variables.
