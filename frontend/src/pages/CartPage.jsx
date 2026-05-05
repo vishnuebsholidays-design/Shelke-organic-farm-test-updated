@@ -5,7 +5,6 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
 import { calculateDiscount, getActiveMembership } from '../utils/membershipUtils';
-import { API_BASE_URL } from '../config/api';
 
 
 function CartPage() {
@@ -138,7 +137,7 @@ function CartPage() {
                       item.image || item.image_url
                         ? String(item.image || item.image_url).startsWith('http')
                           ? item.image || item.image_url
-                          : `${API_BASE_URL}${item.image || item.image_url}`
+                          : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${item.image || item.image_url}`
                         : '';
 
                     return (

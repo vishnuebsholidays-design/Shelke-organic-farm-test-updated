@@ -2,7 +2,6 @@ import './AdminVideosPage.css';
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import AdminLayout from '../components/AdminLayout';
-import { API_BASE_URL } from '../config/api';
 
 const emptyForm = {
   title: '',
@@ -43,7 +42,7 @@ function AdminVideosPage() {
   const fetchVideos = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_BASE_URL}/admin/watch-videos`, {
+      const res = await axios.get('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin/watch-videos', {
         headers: { 'x-admin-key': adminKey },
       });
       setVideos(Array.isArray(res.data) ? res.data : []);
@@ -104,12 +103,12 @@ function AdminVideosPage() {
     try {
       if (editingId) {
         await axios.put(
-          `${API_BASE_URL}/admin/watch-videos/${editingId}`,
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin/watch-videos/${editingId}`,
           formData,
           { headers: { 'x-admin-key': adminKey } }
         );
       } else {
-        await axios.post(`${API_BASE_URL}/admin/watch-videos`, formData, {
+        await axios.post('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin/watch-videos', formData, {
           headers: { 'x-admin-key': adminKey },
         });
       }
@@ -147,7 +146,7 @@ function AdminVideosPage() {
     if (!ok) return;
 
     try {
-      await axios.delete(`${API_BASE_URL}/admin/watch-videos/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin/watch-videos/${id}`, {
         headers: { 'x-admin-key': adminKey },
       });
       fetchVideos();

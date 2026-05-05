@@ -5,9 +5,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { API_BASE_URL } from '../config/api';
 
-const API = API_BASE_URL;
+const API = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}';
 const WISHLIST_KEY = 'wishlistItems';
 
 /**

@@ -2,9 +2,8 @@ import './AdminProductsPage.css';
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import AdminLayout from '../components/AdminLayout';
-import { API_BASE_URL } from '../config/api';
 
-const API = API_BASE_URL;
+const API = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}';
 const PRODUCTS_PER_PAGE = 10;
 
 const emptyForm = {

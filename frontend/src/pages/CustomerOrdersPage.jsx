@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { API_BASE_URL } from '../config/api';
 
 function CustomerOrdersPage() {
   const customerUser = JSON.parse(localStorage.getItem('customerUser') || 'null');
@@ -26,7 +25,7 @@ function CustomerOrdersPage() {
         return;
       }
 
-      const response = await axios.get(`${API_BASE_URL}/users/${customerUser.id}/orders`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/users/${customerUser.id}/orders`);
       setOrders(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Customer order history error:', err);

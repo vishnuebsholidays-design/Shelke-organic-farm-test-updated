@@ -4,9 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { API_BASE_URL } from '../config/api';
 
-const API = API_BASE_URL;
+const API = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}';
 
 const fallbackPlans = [
   {

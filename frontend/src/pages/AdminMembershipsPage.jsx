@@ -2,9 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
-import { API_BASE_URL } from '../config/api';
 
-const API = API_BASE_URL;
+const API = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}';
 const PAGE_SIZE = 10;
 
 function AdminMembershipsPage() {

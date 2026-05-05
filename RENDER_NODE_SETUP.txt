@@ -1,0 +1,30 @@
+CORRECT RENDER DEPLOYMENT FOR THIS ORIGINAL PROJECT
+
+IMPORTANT: Use node-backend for backend. Do NOT use Java backend folder for this project deployment.
+
+BACKEND SERVICE (Render Web Service):
+Repository: your GitHub repo
+Root Directory: node-backend
+Runtime/Language: Node
+Build Command: npm install
+Start Command: npm start
+
+Environment Variables:
+PORT=5000
+DB_HOST=your-live-mysql-host
+DB_PORT=3306
+DB_USER=your-live-mysql-username
+DB_PASSWORD=your-live-mysql-password
+DB_NAME=shelke_store
+RAZORPAY_KEY_ID=rzp_test_SknBkvw7NxAjJH
+RAZORPAY_KEY_SECRET=OPZH6GcgemRds4wDJ6AjPXV3
+
+FRONTEND STATIC SITE:
+Root Directory: frontend
+Build Command: npm install && npm run build
+Publish Directory: dist
+Environment Variable:
+VITE_API_URL=https://your-node-backend-service-name.onrender.com
+
+NOTE:
+Your local MySQL localhost/root cannot work on Render. You must use a hosted MySQL database and import your local shelke_store database into it.

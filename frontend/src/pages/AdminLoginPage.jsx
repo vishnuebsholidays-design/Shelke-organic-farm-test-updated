@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { API_BASE_URL } from '../config/api';
 
 function AdminLoginPage() {
   const [password, setPassword] = useState('');
@@ -16,7 +15,7 @@ function AdminLoginPage() {
       setLoading(true);
       setError('');
 
-      const response = await axios.post(`${API_BASE_URL}/admin/login`, {
+      const response = await axios.post('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin/login', {
         password,
       });
 

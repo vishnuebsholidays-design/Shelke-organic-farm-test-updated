@@ -4,9 +4,8 @@ import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { API_BASE_URL } from '../config/api';
 
-const API = API_BASE_URL;
+const API = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}';
 
 function MembershipCheckoutPage() {
   const { planId } = useParams();

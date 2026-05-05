@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
-import { API_BASE_URL } from '../config/api';
 
 const PAGE_SIZE = 5;
 
@@ -30,7 +29,7 @@ function AdminOrdersPage() {
       setLoading(true);
       setError('');
 
-      const response = await axios.get(`${API_BASE_URL}/admin/orders`, {
+      const response = await axios.get('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin/orders', {
         headers: { 'x-admin-key': adminKey },
       });
 
@@ -89,7 +88,7 @@ function AdminOrdersPage() {
   const updateStatus = async (orderId, status) => {
     try {
       await axios.put(
-        `${API_BASE_URL}/admin/orders/${orderId}/status`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin/orders/${orderId}/status`,
         { status },
         { headers: { 'x-admin-key': adminKey } }
       );

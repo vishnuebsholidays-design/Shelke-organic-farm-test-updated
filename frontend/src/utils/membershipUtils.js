@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { API_BASE_URL } from '../config/api';
 
 export const getPlanColor = (planId) => {
   if (planId === 'silver') return '#c0c0c0';
@@ -31,7 +30,7 @@ export const getActiveMembership = async (email) => {
 
   try {
     const res = await axios.get(
-      `${API_BASE_URL}/customer/active-membership/${encodeURIComponent(email)}`
+      `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/customer/active-membership/${encodeURIComponent(email)}`
     );
 
     return {

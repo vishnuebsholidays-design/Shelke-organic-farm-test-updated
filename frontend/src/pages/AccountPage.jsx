@@ -5,7 +5,6 @@ import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { getActiveMembership } from '../utils/membershipUtils';
-import { API_BASE_URL } from '../config/api';
 
 function AccountPage() {
   const navigate = useNavigate();
@@ -61,7 +60,7 @@ function AccountPage() {
   const fetchDefaultAddress = async () => {
     try {
       if (!customerUser?.id) return;
-      const response = await axios.get(`${API_BASE_URL}/users/${customerUser.id}/default-address`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/users/${customerUser.id}/default-address`);
       setDefaultAddress(response.data || null);
     } catch (error) {
       console.error('Default address fetch error:', error);
@@ -72,7 +71,7 @@ function AccountPage() {
   const fetchRecentOrders = async () => {
     try {
       if (!customerUser?.id) return;
-      const response = await axios.get(`${API_BASE_URL}/users/${customerUser.id}/orders`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/users/${customerUser.id}/orders`);
       const orders = Array.isArray(response.data) ? response.data : [];
       setRecentOrders(orders.slice(0, 3));
     } catch (error) {

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { API_BASE_URL } from '../config/api';
 
 function SignupPage() {
   const navigate = useNavigate();
@@ -30,7 +29,7 @@ function SignupPage() {
       setLoading(true);
       setError('');
 
-      const response = await axios.post(`${API_BASE_URL}/auth/signup`, formData);
+      const response = await axios.post('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/auth/signup', formData);
 
       localStorage.setItem('customerUser', JSON.stringify(response.data.user));
       alert('Account created successfully');

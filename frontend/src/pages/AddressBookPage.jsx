@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { API_BASE_URL } from '../config/api';
 
 function AddressBookPage() {
   const customerUser = JSON.parse(localStorage.getItem('customerUser') || 'null');
@@ -35,7 +34,7 @@ function AddressBookPage() {
     try {
       setLoading(true);
       setError('');
-      const response = await axios.get(`${API_BASE_URL}/users/${customerUser.id}/addresses`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/users/${customerUser.id}/addresses`);
       const data = Array.isArray(response.data) ? response.data : [];
       setAddresses(data);
 
@@ -99,12 +98,12 @@ function AddressBookPage() {
 
       if (editingId) {
         await axios.put(
-          `${API_BASE_URL}/users/${customerUser.id}/addresses/${editingId}`,
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/users/${customerUser.id}/addresses/${editingId}`,
           formData
         );
         setMessage('Address updated successfully');
       } else {
-        await axios.post(`${API_BASE_URL}/users/${customerUser.id}/addresses`, formData);
+        await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/users/${customerUser.id}/addresses`, formData);
         setMessage('Address added successfully');
       }
 
@@ -123,7 +122,7 @@ function AddressBookPage() {
     if (!confirmed) return;
 
     try {
-      await axios.delete(`${API_BASE_URL}/users/${customerUser.id}/addresses/${addressId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/users/${customerUser.id}/addresses/${addressId}`);
       setMessage('Address deleted successfully');
       fetchAddresses();
     } catch (err) {
@@ -134,7 +133,7 @@ function AddressBookPage() {
 
   const handleSetDefault = async (addressId) => {
     try {
-      await axios.put(`${API_BASE_URL}/users/${customerUser.id}/addresses/${addressId}/default`);
+      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/users/${customerUser.id}/addresses/${addressId}/default`);
       setMessage('Default address updated');
       fetchAddresses();
     } catch (err) {

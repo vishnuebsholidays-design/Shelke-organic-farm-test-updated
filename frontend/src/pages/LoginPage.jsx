@@ -3,7 +3,6 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { API_BASE_URL } from '../config/api';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -40,7 +39,7 @@ function LoginPage() {
       setLoading(true);
       setError('');
 
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+      const response = await axios.post('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/auth/login', {
         email: formData.email,
         password: formData.password,
       });
