@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import AdminLayout from '../components/AdminLayout';
 
-const API = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}';
+const API = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}`;
 const PRODUCTS_PER_PAGE = 10;
 
 const emptyForm = {

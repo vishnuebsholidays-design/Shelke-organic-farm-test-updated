@@ -29,7 +29,7 @@ function SignupPage() {
       setLoading(true);
       setError('');
 
-      const response = await axios.post('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/auth/signup', formData);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/auth/signup`, formData);
 
       localStorage.setItem('customerUser', JSON.stringify(response.data.user));
       alert('Account created successfully');

@@ -12,7 +12,7 @@ function WatchShopSection() {
 
   const fetchVideos = async () => {
     try {
-      const res = await axios.get('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/watch-videos');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/watch-videos');
       setVideos(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
       console.error('Watch videos fetch error:', error);

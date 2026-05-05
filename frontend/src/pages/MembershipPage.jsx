@@ -5,7 +5,7 @@ import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-const API = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}';
+const API = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}`;
 
 const fallbackPlans = [
   {

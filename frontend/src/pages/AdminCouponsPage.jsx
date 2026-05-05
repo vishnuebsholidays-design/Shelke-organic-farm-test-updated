@@ -3,7 +3,7 @@ import axios from 'axios';
 import AdminLayout from '../components/AdminLayout';
 import './AdminCouponsPage.css';
 
-const API = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}';
+const API = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}`;
 
 const emptyForm = {
   code: '',

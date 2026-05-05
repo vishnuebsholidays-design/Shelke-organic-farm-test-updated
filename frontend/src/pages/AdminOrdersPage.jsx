@@ -29,7 +29,7 @@ function AdminOrdersPage() {
       setLoading(true);
       setError('');
 
-      const response = await axios.get('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin/orders', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin/orders`, {
         headers: { 'x-admin-key': adminKey },
       });
 

@@ -15,7 +15,7 @@ function AdminLoginPage() {
       setLoading(true);
       setError('');
 
-      const response = await axios.post('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin/login', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin/login`, {
         password,
       });
 
