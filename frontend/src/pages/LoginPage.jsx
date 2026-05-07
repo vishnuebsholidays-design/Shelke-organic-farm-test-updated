@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import logo from '../assets/logo.png';
+import heroImage from '../assets/hero.png';
+import './AuthPage.css';
 
+/**
+ * Customer login page.
+ * Premium 3D design inspired by the shared reference image,
+ * but branded with Shelke Organic Farm content and existing login API.
+ */
 function LoginPage() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    remember: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -24,11 +31,11 @@ function LoginPage() {
   }, [navigate]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
 
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -39,13 +46,14 @@ function LoginPage() {
       setLoading(true);
       setError('');
 
-      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/auth/login`, {
+      const response = await axios.post('http://localhost:5000/auth/login', {
         email: formData.email,
         password: formData.password,
       });
 
       if (response.data?.user) {
         localStorage.setItem('customerUser', JSON.stringify(response.data.user));
+        localStorage.setItem('rememberCustomerLogin', formData.remember ? 'yes' : 'no');
 
         const redirectPath = localStorage.getItem('customerRedirectAfterLogin') || '/';
         localStorage.removeItem('customerRedirectAfterLogin');
@@ -64,170 +72,121 @@ function LoginPage() {
   };
 
   return (
-    <div style={page}>
-      <Header />
+    <main className="auth-page" style={{ '--auth-bg-image': `url(${heroImage})` }}>
+      <div className="auth-browser-pill" aria-hidden="true">
+        <div className="auth-pill-icons">
+          <span className="auth-pill-icon">‹</span>
+          <span className="auth-pill-icon">›</span>
+        </div>
+        <div className="auth-pill-url">www.shelkeorganicfarm.com</div>
+        <div className="auth-pill-actions">
+          <span className="auth-pill-icon">↻</span>
+          <span className="auth-pill-icon">＋</span>
+        </div>
+      </div>
 
-      <div style={container}>
-        <div style={card}>
-          <h1 style={title}>Customer Login</h1>
-          <p style={subtitle}>Login to manage your orders, address, and membership.</p>
+      <section className="auth-shell">
+        <div className="auth-visual-card">
+          <div className="auth-visual-img" />
 
-          {error && <div style={errorBox}>{error}</div>}
+          <div className="auth-users-strip">
+            <div className="auth-avatar-stack" aria-hidden="true">
+              <span className="auth-avatar">S</span>
+              <span className="auth-avatar">O</span>
+              <span className="auth-avatar">F</span>
+              <span className="auth-count">30k</span>
+            </div>
+            <div className="auth-users-text">
+              <strong>Join with 30k+ customers!</strong>
+              <span>Trusted organic products from farm to home</span>
+            </div>
+          </div>
 
-          <form onSubmit={handleLogin} style={form}>
-            <div style={field}>
-              <label style={label}>Email Address</label>
+          <div className="auth-hero-copy">
+            <h2>Back to nature.</h2>
+            <p>Login to manage orders, membership, wishlist and addresses.</p>
+          </div>
+        </div>
+
+        <div className="auth-form-card">
+          <div className="auth-logo-wrap">
+            <img src={logo} alt="Shelke Organic Farm" className="auth-logo" />
+          </div>
+
+          <h1>Welcome back</h1>
+          <p className="auth-subtitle">Please enter your details to continue your Shelke Organic Farm journey.</p>
+
+          {error && <div className="auth-error">{error}</div>}
+
+          <form onSubmit={handleLogin} className="auth-form">
+            <div className="auth-field">
+              <label htmlFor="email">Email</label>
               <input
-                style={input}
+                id="email"
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                autoComplete="email"
                 required
               />
             </div>
 
-            <div style={field}>
-              <label style={label}>Password</label>
+            <div className="auth-field">
+              <label htmlFor="password">Password</label>
               <input
-                style={input}
+                id="password"
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
+                autoComplete="current-password"
                 required
               />
             </div>
 
-            <button type="submit" style={button} disabled={loading}>
+            <div className="auth-options">
+              <label className="auth-check">
+                <input
+                  type="checkbox"
+                  name="remember"
+                  checked={formData.remember}
+                  onChange={handleChange}
+                />
+                Remember for 30 days
+              </label>
+
+              <Link to="/forgot-password" className="auth-link">
+                Forgot Password
+              </Link>
+            </div>
+
+            <button type="submit" className="auth-main-btn" disabled={loading}>
               {loading ? 'Logging in...' : 'Login'}
+              <span className="auth-arrow">↗</span>
             </button>
           </form>
 
-          <div style={bottomLinks}>
-            <Link to="/forgot-password" style={link}>
-              Forgot Password?
-            </Link>
+          <p className="auth-switch-text">
+            New customer? <Link to="/signup">Create Account</Link>
+          </p>
 
-            <p style={signupText}>
-              New customer?{' '}
-              <Link to="/signup" style={link}>
-                Create Account
-              </Link>
-            </p>
+          <div className="auth-divider">or</div>
+
+          <Link to="/signup" className="auth-google-btn">
+            Continue with Shelke Organic
+            <span className="auth-google-icon">SO</span>
+          </Link>
+
+          <div className="auth-benefits">
+            <span className="auth-benefit">Fast Checkout</span>
+            <span className="auth-benefit">Order Tracking</span>
+            <span className="auth-benefit">Membership Offers</span>
           </div>
         </div>
-      </div>
-
-      <Footer />
-    </div>
+      </section>
+    </main>
   );
 }
-
-const page = {
-  background: '#f6f3ee',
-  minHeight: '100vh',
-};
-
-const container = {
-  maxWidth: '1180px',
-  margin: '0 auto',
-  padding: '60px 18px',
-  display: 'flex',
-  justifyContent: 'center',
-};
-
-const card = {
-  width: '100%',
-  maxWidth: '460px',
-  background: '#fff',
-  border: '1px solid #ebe3d8',
-  borderRadius: '18px',
-  padding: '30px',
-  boxShadow: '0 8px 22px rgba(0,0,0,0.04)',
-};
-
-const title = {
-  margin: '0 0 8px',
-  textAlign: 'center',
-  fontSize: '30px',
-  fontWeight: '900',
-  color: '#171717',
-};
-
-const subtitle = {
-  margin: '0 0 22px',
-  textAlign: 'center',
-  color: '#6b6258',
-  fontSize: '14px',
-  lineHeight: '1.6',
-};
-
-const form = {
-  display: 'grid',
-  gap: '14px',
-};
-
-const field = {
-  display: 'grid',
-  gap: '6px',
-};
-
-const label = {
-  fontSize: '13px',
-  fontWeight: '700',
-  color: '#5f564d',
-};
-
-const input = {
-  width: '100%',
-  border: '1px solid #ddd5c9',
-  borderRadius: '10px',
-  padding: '12px 14px',
-  fontSize: '14px',
-  outline: 'none',
-};
-
-const button = {
-  width: '100%',
-  border: 'none',
-  background: '#2f5d3a',
-  color: '#fff',
-  padding: '13px 16px',
-  borderRadius: '10px',
-  fontSize: '14px',
-  fontWeight: '800',
-  cursor: 'pointer',
-  marginTop: '8px',
-};
-
-const errorBox = {
-  background: '#fff0ef',
-  color: '#b42318',
-  border: '1px solid #ffd1cc',
-  borderRadius: '10px',
-  padding: '12px',
-  fontSize: '13px',
-  fontWeight: '700',
-  marginBottom: '14px',
-  textAlign: 'center',
-};
-
-const bottomLinks = {
-  marginTop: '18px',
-  textAlign: 'center',
-};
-
-const link = {
-  color: '#2f5d3a',
-  fontWeight: '800',
-  textDecoration: 'none',
-};
-
-const signupText = {
-  marginTop: '14px',
-  color: '#6b6258',
-  fontSize: '14px',
-};
 
 export default LoginPage;

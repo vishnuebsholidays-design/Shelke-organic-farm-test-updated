@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
+import heroImage from '../assets/hero.png';
+import './AuthPage.css';
 
+/**
+ * Customer signup page.
+ * Uses existing /auth/signup API and premium Shelke Organic Farm 3D UI.
+ */
 function SignupPage() {
   const navigate = useNavigate();
 
@@ -29,7 +36,7 @@ function SignupPage() {
       setLoading(true);
       setError('');
 
-      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/auth/signup`, formData);
+      const response = await axios.post('http://localhost:5000/auth/signup', formData);
 
       localStorage.setItem('customerUser', JSON.stringify(response.data.user));
       alert('Account created successfully');
@@ -43,135 +50,124 @@ function SignupPage() {
   };
 
   return (
-    <div style={pageWrap}>
-      <div style={cardStyle}>
-        <h1 style={headingStyle}>Create Account</h1>
-        <p style={subText}>Signup for faster checkout and account access</p>
-
-        <form onSubmit={handleSubmit} style={{ marginTop: '24px' }}>
-          <input
-            type="text"
-            name="fullName"
-            placeholder="Full name"
-            value={formData.fullName}
-            onChange={handleChange}
-            style={inputStyle}
-          />
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Email address"
-            value={formData.email}
-            onChange={handleChange}
-            style={inputStyle}
-          />
-
-          <input
-            type="text"
-            name="phone"
-            placeholder="Phone number"
-            value={formData.phone}
-            onChange={handleChange}
-            style={inputStyle}
-          />
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            style={inputStyle}
-          />
-
-          {error && <div style={errorStyle}>{error}</div>}
-
-          <button type="submit" disabled={loading} style={buttonStyle}>
-            {loading ? 'Creating account...' : 'Create Account'}
-          </button>
-        </form>
-
-        <p style={{ marginTop: '18px', textAlign: 'center', color: '#6b6258' }}>
-          Already have account?{' '}
-          <Link to="/login" style={linkStyle}>
-            Login
-          </Link>
-        </p>
+    <main className="auth-page" style={{ '--auth-bg-image': `url(${heroImage})` }}>
+      <div className="auth-browser-pill" aria-hidden="true">
+        <div className="auth-pill-icons">
+          <span className="auth-pill-icon">‹</span>
+          <span className="auth-pill-icon">›</span>
+        </div>
+        <div className="auth-pill-url">www.shelkeorganicfarm.com/signup</div>
+        <div className="auth-pill-actions">
+          <span className="auth-pill-icon">↻</span>
+          <span className="auth-pill-icon">＋</span>
+        </div>
       </div>
-    </div>
+
+      <section className="auth-shell">
+        <div className="auth-visual-card">
+          <div className="auth-visual-img" />
+
+          <div className="auth-users-strip">
+            <div className="auth-avatar-stack" aria-hidden="true">
+              <span className="auth-avatar">A</span>
+              <span className="auth-avatar">2</span>
+              <span className="auth-avatar">G</span>
+              <span className="auth-count">SO</span>
+            </div>
+            <div className="auth-users-text">
+              <strong>Create your farm account</strong>
+              <span>Save address, wishlist, membership and faster checkout</span>
+            </div>
+          </div>
+
+          <div className="auth-hero-copy">
+            <h2>Pure food starts here.</h2>
+            <p>Signup and get access to organic products, deals and membership benefits.</p>
+          </div>
+        </div>
+
+        <div className="auth-form-card">
+          <div className="auth-logo-wrap">
+            <img src={logo} alt="Shelke Organic Farm" className="auth-logo" />
+          </div>
+
+          <h1>Create account</h1>
+          <p className="auth-subtitle">Join Shelke Organic Farm for faster checkout and premium customer benefits.</p>
+
+          {error && <div className="auth-error">{error}</div>}
+
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="auth-field">
+              <label htmlFor="fullName">Full Name</label>
+              <input
+                id="fullName"
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                autoComplete="name"
+                required
+              />
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                autoComplete="email"
+                required
+              />
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="phone">Phone Number</label>
+              <input
+                id="phone"
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                autoComplete="tel"
+                required
+              />
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                autoComplete="new-password"
+                required
+              />
+            </div>
+
+            <button type="submit" className="auth-main-btn" disabled={loading}>
+              {loading ? 'Creating account...' : 'Sign Up'}
+              <span className="auth-arrow">↗</span>
+            </button>
+          </form>
+
+          <p className="auth-switch-text">
+            Already have an account? <Link to="/login">Login</Link>
+          </p>
+
+          <div className="auth-benefits">
+            <span className="auth-benefit">Member Pricing</span>
+            <span className="auth-benefit">Fresh Products</span>
+            <span className="auth-benefit">Easy Reorder</span>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
-
-const pageWrap = {
-  minHeight: '100vh',
-  background: '#f6f3ee',
-  display: 'grid',
-  placeItems: 'center',
-  padding: '20px',
-};
-
-const cardStyle = {
-  width: '100%',
-  maxWidth: '520px',
-  background: '#fff',
-  border: '1px solid #ebe3d8',
-  borderRadius: '22px',
-  padding: '34px',
-  boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
-};
-
-const headingStyle = {
-  margin: 0,
-  fontSize: '42px',
-  textAlign: 'center',
-  color: '#171717',
-};
-
-const subText = {
-  marginTop: '10px',
-  textAlign: 'center',
-  color: '#6b6258',
-  fontSize: '17px',
-};
-
-const inputStyle = {
-  width: '100%',
-  padding: '14px 16px',
-  borderRadius: '12px',
-  border: '1px solid #ddd5c9',
-  fontSize: '16px',
-  marginBottom: '14px',
-  outline: 'none',
-  boxSizing: 'border-box',
-};
-
-const buttonStyle = {
-  width: '100%',
-  border: 'none',
-  background: '#2f5d3a',
-  color: '#fff',
-  padding: '14px 18px',
-  borderRadius: '12px',
-  fontWeight: '800',
-  fontSize: '16px',
-  cursor: 'pointer',
-};
-
-const errorStyle = {
-  background: '#fff0ef',
-  color: '#b42318',
-  padding: '12px 14px',
-  borderRadius: '10px',
-  marginBottom: '14px',
-  fontWeight: '700',
-  textAlign: 'center',
-};
-
-const linkStyle = {
-  color: '#2f5d3a',
-  fontWeight: '800',
-  textDecoration: 'none',
-};
 
 export default SignupPage;
