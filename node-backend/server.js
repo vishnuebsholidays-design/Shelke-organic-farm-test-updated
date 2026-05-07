@@ -45,21 +45,41 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // -------------------- MYSQL CONNECTION --------------------
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'Arvish@1998',
-  database: 'shelke_store',
+// IMPORTANT:
+// Localhost uses local MySQL values. Render/live server uses Environment Variables.
+// This pool fixes Render error: ECONNREFUSED 127.0.0.1:3306 and
+// "Can't add new command when connection is in closed state".
+const dbConfig = {
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'Arvish@1998',
+  database: process.env.DB_NAME || 'shelke_store',
+  port: Number(process.env.DB_PORT || 3306),
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+};
+
+const db = mysql.createPool(dbConfig);
+
+console.log('DB Config Loaded:', {
+  host: dbConfig.host,
+  user: dbConfig.user,
+  database: dbConfig.database,
+  port: dbConfig.port,
 });
 
-db.connect((err) => {
+db.getConnection((err, connection) => {
   if (err) {
-    console.error('DB Error:', err);
-  } else {
-    console.log('MySQL Connected');
-    ensureMembershipPlansTable();
-    ensureOrderPaymentColumns();
+    console.error('DB connection failed:', err);
+    return;
   }
+
+  console.log('DB connected successfully 🚀');
+  connection.release();
+
+  ensureMembershipPlansTable();
+  ensureOrderPaymentColumns();
 });
 
 // ================== RAZORPAY SETUP ==================
@@ -199,23 +219,15 @@ app.post('/auth/signup', async (req, res) => {
   try {
     const fullName = String(req.body.fullName || '').trim();
     const email = String(req.body.email || '').trim().toLowerCase();
-    const phone = String(req.body.phone || '').replace(/\D/g, '').slice(0, 10);
+    const phone = String(req.body.phone || '').replace(/\D/g, '');
     const password = String(req.body.password || '');
 
-    if (!fullName || !email || !phone || !password) {
-      return res.status(400).json({ error: 'Full name, email, mobile number, and password are required' });
+    if (!fullName || !email || !password) {
+      return res.status(400).json({ error: 'Full name, email, and password are required' });
     }
 
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      return res.status(400).json({ error: 'Please enter a valid email address' });
-    }
-
-    if (!/^\d{10}$/.test(phone)) {
+    if (phone && !/^\d{10}$/.test(phone)) {
       return res.status(400).json({ error: 'Mobile number must be exactly 10 digits' });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
 
     const checkSql = 'SELECT id, email, phone FROM users WHERE email = ? OR phone = ? LIMIT 1';
@@ -228,13 +240,16 @@ app.post('/auth/signup', async (req, res) => {
 
       if (checkResult.length > 0) {
         const existingUser = checkResult[0];
+
         if (String(existingUser.email || '').toLowerCase() === email) {
-          return res.status(400).json({ error: 'This email is already registered. Please use another email or login.' });
+          return res.status(400).json({ error: 'User already exists with this email' });
         }
 
-        if (String(existingUser.phone || '') === phone) {
-          return res.status(400).json({ error: 'This mobile number is already registered. Please use another number or login.' });
+        if (phone && String(existingUser.phone || '') === phone) {
+          return res.status(400).json({ error: 'User already exists with this mobile number' });
         }
+
+        return res.status(400).json({ error: 'User already exists' });
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -247,11 +262,6 @@ app.post('/auth/signup', async (req, res) => {
       db.query(insertSql, [fullName, email, phone, hashedPassword], (insertErr, result) => {
         if (insertErr) {
           console.error('Signup Insert Error:', insertErr);
-
-          if (String(insertErr.message || '').toLowerCase().includes('duplicate')) {
-            return res.status(400).json({ error: 'Email or mobile number already exists' });
-          }
-
           return res.status(500).json({ error: 'Failed to create account' });
         }
 
@@ -274,8 +284,7 @@ app.post('/auth/signup', async (req, res) => {
 });
 
 app.post('/auth/login', (req, res) => {
-  const email = String(req.body.email || '').trim().toLowerCase();
-  const password = String(req.body.password || '');
+  const { email, password } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
