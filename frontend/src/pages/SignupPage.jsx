@@ -1,48 +1,65 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.png';
-import heroImage from '../assets/hero.png';
 import './AuthPage.css';
+import logo from '../assets/logo.png';
 
 /**
- * Customer signup page.
- * Uses existing /auth/signup API and premium Shelke Organic Farm 3D UI.
+ * Customer Signup Page
+ * - Mobile-friendly account creation.
+ * - Phone field accepts only numbers and maximum 10 digits.
+ * - Backend blocks duplicate email and phone.
  */
+const API = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : '');
+
 function SignupPage() {
   const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    password: '',
-  });
-
+  const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    const { name, value } = e.target;
+    if (name === 'phone') {
+      const onlyNumbers = value.replace(/\D/g, '').slice(0, 10);
+      setFormData((prev) => ({ ...prev, phone: onlyNumbers }));
+      return;
+    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validateForm = () => {
+    if (!formData.fullName.trim()) return 'Full name is required';
+    if (!formData.email.trim()) return 'Email is required';
+    if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) return 'Please enter a valid email address';
+    if (!/^\d{10}$/.test(formData.phone)) return 'Mobile number must be exactly 10 digits';
+    if (formData.password.length < 6) return 'Password must be at least 6 characters';
+    return '';
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setLoading(true);
+    setError('');
 
     try {
-      setLoading(true);
-      setError('');
+      const payload = {
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone,
+        password: formData.password,
+      };
 
-      const response = await axios.post('http://localhost:5000/auth/signup', formData);
-
+      const response = await axios.post(`${API}/auth/signup`, payload);
       localStorage.setItem('customerUser', JSON.stringify(response.data.user));
-      alert('Account created successfully');
       navigate('/account');
     } catch (err) {
-      console.error('Signup error:', err);
       setError(err.response?.data?.error || 'Failed to create account');
     } finally {
       setLoading(false);
@@ -50,121 +67,79 @@ function SignupPage() {
   };
 
   return (
-    <main className="auth-page" style={{ '--auth-bg-image': `url(${heroImage})` }}>
-      <div className="auth-browser-pill" aria-hidden="true">
-        <div className="auth-pill-icons">
-          <span className="auth-pill-icon">‹</span>
-          <span className="auth-pill-icon">›</span>
-        </div>
-        <div className="auth-pill-url">www.shelkeorganicfarm.com/signup</div>
-        <div className="auth-pill-actions">
-          <span className="auth-pill-icon">↻</span>
-          <span className="auth-pill-icon">＋</span>
-        </div>
-      </div>
-
+    <main className="auth-page auth-signup-page">
       <section className="auth-shell">
-        <div className="auth-visual-card">
-          <div className="auth-visual-img" />
-
-          <div className="auth-users-strip">
-            <div className="auth-avatar-stack" aria-hidden="true">
-              <span className="auth-avatar">A</span>
-              <span className="auth-avatar">2</span>
-              <span className="auth-avatar">G</span>
-              <span className="auth-count">SO</span>
+        <aside className="auth-visual-card">
+          <div className="auth-top-cluster">
+            <div className="auth-people-row" aria-label="Trusted customers">
+              <span>S</span>
+              <span>O</span>
+              <span>F</span>
+              <strong>30k</strong>
             </div>
-            <div className="auth-users-text">
-              <strong>Create your farm account</strong>
-              <span>Save address, wishlist, membership and faster checkout</span>
+            <div className="auth-trust-text">
+            <b>CREATE YOUR FARM ACCOUNT</b>
+            <small>Get offers, membership benefits and faster checkout</small>
             </div>
           </div>
-
           <div className="auth-hero-copy">
-            <h2>Pure food starts here.</h2>
-            <p>Signup and get access to organic products, deals and membership benefits.</p>
+            <h2>Start fresh.</h2>
+            <p>Join Shelke Organic Farms and enjoy premium farm-to-home shopping.</p>
           </div>
-        </div>
+        </aside>
 
-        <div className="auth-form-card">
-          <div className="auth-logo-wrap">
-            <img src={logo} alt="Shelke Organic Farm" className="auth-logo" />
-          </div>
+        <section className="auth-form-card">
+          <div className="auth-card-cut auth-card-cut-one" />
+          <div className="auth-card-cut auth-card-cut-two" />
 
-          <h1>Create account</h1>
-          <p className="auth-subtitle">Join Shelke Organic Farm for faster checkout and premium customer benefits.</p>
+          <img src={logo} alt="Shelke Organic Farms" className="auth-logo" />
+          <h1>Create Account</h1>
+          <p className="auth-subtitle">Signup for faster checkout, order tracking and membership offers.</p>
 
           {error && <div className="auth-error">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="auth-form">
-            <div className="auth-field">
-              <label htmlFor="fullName">Full Name</label>
-              <input
-                id="fullName"
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                autoComplete="name"
-                required
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="auth-form auth-signup-form">
+            <label>
+              <span>Full Name</span>
+              <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="Enter full name" autoComplete="name" required />
+            </label>
 
-            <div className="auth-field">
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                autoComplete="email"
-                required
-              />
-            </div>
+            <label>
+              <span>Email</span>
+              <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Enter email address" autoComplete="email" required />
+            </label>
 
-            <div className="auth-field">
-              <label htmlFor="phone">Phone Number</label>
+            <label>
+              <span>Mobile Number</span>
               <input
-                id="phone"
                 type="tel"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
+                placeholder="10 digit mobile number"
+                inputMode="numeric"
+                pattern="[0-9]{10}"
+                maxLength="10"
                 autoComplete="tel"
                 required
               />
-            </div>
+            </label>
 
-            <div className="auth-field">
-              <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                autoComplete="new-password"
-                required
-              />
-            </div>
+            <label>
+              <span>Password</span>
+              <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Minimum 6 characters" autoComplete="new-password" required />
+            </label>
 
-            <button type="submit" className="auth-main-btn" disabled={loading}>
-              {loading ? 'Creating account...' : 'Sign Up'}
-              <span className="auth-arrow">↗</span>
+            <button type="submit" className="auth-submit" disabled={loading}>
+              {loading ? 'Creating account...' : 'Create Account'}
+              <span>➜</span>
             </button>
           </form>
 
           <p className="auth-switch-text">
             Already have an account? <Link to="/login">Login</Link>
           </p>
-
-          <div className="auth-benefits">
-            <span className="auth-benefit">Member Pricing</span>
-            <span className="auth-benefit">Fresh Products</span>
-            <span className="auth-benefit">Easy Reorder</span>
-          </div>
-        </div>
+        </section>
       </section>
     </main>
   );

@@ -1,70 +1,55 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.png';
-import heroImage from '../assets/hero.png';
 import './AuthPage.css';
+import logo from '../assets/logo.png';
 
 /**
- * Customer login page.
- * Premium 3D design inspired by the shared reference image,
- * but branded with Shelke Organic Farm content and existing login API.
+ * Customer Login Page
+ * - Full-screen responsive 3D organic UI.
+ * - No Header/Footer so the page fits in one viewport.
+ * - Uses deployed backend when hosted and localhost only during local development.
  */
+const API = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : '');
+
 function LoginPage() {
   const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    remember: false,
-  });
-
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const savedUser = localStorage.getItem('customerUser');
-
-    if (savedUser) {
-      navigate('/');
-    }
+    if (savedUser) navigate('/');
   }, [navigate]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
 
     try {
-      setLoading(true);
-      setError('');
-
-      const response = await axios.post('http://localhost:5000/auth/login', {
-        email: formData.email,
+      const response = await axios.post(`${API}/auth/login`, {
+        email: formData.email.trim().toLowerCase(),
         password: formData.password,
       });
 
-      if (response.data?.user) {
-        localStorage.setItem('customerUser', JSON.stringify(response.data.user));
-        localStorage.setItem('rememberCustomerLogin', formData.remember ? 'yes' : 'no');
-
-        const redirectPath = localStorage.getItem('customerRedirectAfterLogin') || '/';
-        localStorage.removeItem('customerRedirectAfterLogin');
-
-        navigate(redirectPath);
-        window.location.reload();
-      } else {
+      if (!response.data?.user) {
         setError('Login failed. Please try again.');
+        return;
       }
+
+      localStorage.setItem('customerUser', JSON.stringify(response.data.user));
+      const redirectPath = localStorage.getItem('customerRedirectAfterLogin') || '/';
+      localStorage.removeItem('customerRedirectAfterLogin');
+      navigate(redirectPath);
+      window.location.reload();
     } catch (err) {
-      console.error('Login error:', err);
       setError(err.response?.data?.error || 'Invalid email or password');
     } finally {
       setLoading(false);
@@ -72,118 +57,82 @@ function LoginPage() {
   };
 
   return (
-    <main className="auth-page" style={{ '--auth-bg-image': `url(${heroImage})` }}>
-      <div className="auth-browser-pill" aria-hidden="true">
-        <div className="auth-pill-icons">
-          <span className="auth-pill-icon">‹</span>
-          <span className="auth-pill-icon">›</span>
-        </div>
-        <div className="auth-pill-url">www.shelkeorganicfarm.com</div>
-        <div className="auth-pill-actions">
-          <span className="auth-pill-icon">↻</span>
-          <span className="auth-pill-icon">＋</span>
-        </div>
-      </div>
-
+    <main className="auth-page auth-login-page">
       <section className="auth-shell">
-        <div className="auth-visual-card">
-          <div className="auth-visual-img" />
-
-          <div className="auth-users-strip">
-            <div className="auth-avatar-stack" aria-hidden="true">
-              <span className="auth-avatar">S</span>
-              <span className="auth-avatar">O</span>
-              <span className="auth-avatar">F</span>
-              <span className="auth-count">30k</span>
+        <aside className="auth-visual-card">
+          <div className="auth-top-cluster">
+            <div className="auth-people-row" aria-label="Trusted customers">
+              <span>S</span>
+              <span>O</span>
+              <span>F</span>
+              <strong>30k</strong>
             </div>
-            <div className="auth-users-text">
-              <strong>Join with 30k+ customers!</strong>
-              <span>Trusted organic products from farm to home</span>
+            <div className="auth-trust-text">
+            <b>JOIN WITH 30K+ CUSTOMERS!</b>
+            <small>Trusted organic products from farm to home</small>
             </div>
           </div>
-
           <div className="auth-hero-copy">
             <h2>Back to nature.</h2>
-            <p>Login to manage orders, membership, wishlist and addresses.</p>
+            <p>Fresh, pure and premium organic products delivered with care.</p>
           </div>
-        </div>
+        </aside>
 
-        <div className="auth-form-card">
-          <div className="auth-logo-wrap">
-            <img src={logo} alt="Shelke Organic Farm" className="auth-logo" />
-          </div>
+        <section className="auth-form-card">
+          <div className="auth-card-cut auth-card-cut-one" />
+          <div className="auth-card-cut auth-card-cut-two" />
 
+          <img src={logo} alt="Shelke Organic Farms" className="auth-logo" />
           <h1>Welcome back</h1>
           <p className="auth-subtitle">Please enter your details to continue your Shelke Organic Farm journey.</p>
 
           {error && <div className="auth-error">{error}</div>}
 
           <form onSubmit={handleLogin} className="auth-form">
-            <div className="auth-field">
-              <label htmlFor="email">Email</label>
+            <label>
+              <span>Email</span>
               <input
-                id="email"
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                placeholder="Enter email address"
                 autoComplete="email"
                 required
               />
-            </div>
+            </label>
 
-            <div className="auth-field">
-              <label htmlFor="password">Password</label>
+            <label>
+              <span>Password</span>
               <input
-                id="password"
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
+                placeholder="Enter password"
                 autoComplete="current-password"
                 required
               />
-            </div>
+            </label>
 
             <div className="auth-options">
               <label className="auth-check">
-                <input
-                  type="checkbox"
-                  name="remember"
-                  checked={formData.remember}
-                  onChange={handleChange}
-                />
-                Remember for 30 days
+                <input type="checkbox" />
+                <span>Remember me</span>
               </label>
-
-              <Link to="/forgot-password" className="auth-link">
-                Forgot Password
-              </Link>
+              <Link to="/forgot-password">Forgot Password?</Link>
             </div>
 
-            <button type="submit" className="auth-main-btn" disabled={loading}>
+            <button type="submit" className="auth-submit" disabled={loading}>
               {loading ? 'Logging in...' : 'Login'}
-              <span className="auth-arrow">↗</span>
+              <span>➜</span>
             </button>
           </form>
 
           <p className="auth-switch-text">
             New customer? <Link to="/signup">Create Account</Link>
           </p>
-
-          <div className="auth-divider">or</div>
-
-          <Link to="/signup" className="auth-google-btn">
-            Continue with Shelke Organic
-            <span className="auth-google-icon">SO</span>
-          </Link>
-
-          <div className="auth-benefits">
-            <span className="auth-benefit">Fast Checkout</span>
-            <span className="auth-benefit">Order Tracking</span>
-            <span className="auth-benefit">Membership Offers</span>
-          </div>
-        </div>
+        </section>
       </section>
     </main>
   );
