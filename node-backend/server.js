@@ -17,6 +17,14 @@ app.use(express.json());
 
 const ADMIN_KEY = 'admin123';
 
+// -------------------- HEALTH CHECK --------------------
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Shelke Organic backend is running',
+  });
+});
+
 // -------------------- UPLOADS SETUP --------------------
 const uploadsDir = path.join(__dirname, 'uploads');
 
@@ -45,11 +53,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // -------------------- MYSQL CONNECTION --------------------
+// Uses Render/Railway environment variables in production and local values only for localhost testing.
 const db = mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
   port: Number(process.env.DB_PORT || 3306),
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
+  password: process.env.DB_PASSWORD || 'Arvish@1998',
   database: process.env.DB_NAME || 'shelke_store',
 });
 
@@ -1898,6 +1907,67 @@ app.post('/payment/create-order', async (req, res) => {
   }
 });
 
+// Extra route aliases used by older frontend checkout files.
+app.post('/create-razorpay-order', async (req, res) => {
+  try {
+    const { amount, receipt } = req.body;
+
+    if (!amount || Number(amount) <= 0) {
+      return res.status(400).json({ error: 'Valid amount is required' });
+    }
+
+    const options = {
+      amount: Math.round(Number(amount) * 100),
+      currency: 'INR',
+      receipt: receipt || `receipt_${Date.now()}`,
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    res.json({
+      success: true,
+      key: process.env.RAZORPAY_KEY_ID,
+      order,
+    });
+  } catch (error) {
+    console.error('Razorpay create order alias error:', error);
+    res.status(500).json({
+      error: 'Failed to create Razorpay order',
+      details: error.message,
+    });
+  }
+});
+
+app.post('/api/create-razorpay-order', async (req, res) => {
+  try {
+    const { amount, receipt } = req.body;
+
+    if (!amount || Number(amount) <= 0) {
+      return res.status(400).json({ error: 'Valid amount is required' });
+    }
+
+    const options = {
+      amount: Math.round(Number(amount) * 100),
+      currency: 'INR',
+      receipt: receipt || `receipt_${Date.now()}`,
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    res.json({
+      success: true,
+      key: process.env.RAZORPAY_KEY_ID,
+      order,
+    });
+  } catch (error) {
+    console.error('Razorpay create order api alias error:', error);
+    res.status(500).json({
+      error: 'Failed to create Razorpay order',
+      details: error.message,
+    });
+  }
+});
+
 // -------------------- RAZORPAY VERIFY PAYMENT --------------------
 app.post('/payment/verify', (req, res) => {
   try {
@@ -1934,6 +2004,28 @@ app.post('/payment/verify', (req, res) => {
 });
 
 // -------------------- COUPONS --------------------
+function fetchActiveCoupons(req, res) {
+  const sql = `
+    SELECT *
+    FROM coupons
+    WHERE is_active = 1
+      AND (expiry_date IS NULL OR expiry_date >= CURDATE())
+    ORDER BY id DESC
+  `;
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error('Public coupon fetch error:', err);
+      return res.status(500).json({ error: 'Failed to fetch coupons' });
+    }
+
+    res.json(result);
+  });
+}
+
+app.get('/coupons', fetchActiveCoupons);
+app.get('/api/coupons', fetchActiveCoupons);
+
 app.get('/admin/coupons', verifyAdmin, (req, res) => {
   const sql = 'SELECT * FROM coupons ORDER BY id DESC';
 
@@ -2020,7 +2112,7 @@ app.delete('/admin/coupons/:id', verifyAdmin, (req, res) => {
   });
 });
 
-app.post('/apply-coupon', (req, res) => {
+function applyCouponHandler(req, res) {
   const { code, cartTotal, products = [] } = req.body;
 
   if (!code) {
@@ -2143,9 +2235,14 @@ app.post('/apply-coupon', (req, res) => {
       finalTotal: Math.max(0, Number(cartTotal || 0) - discount),
     });
   });
-});
+}
+
+app.post('/apply-coupon', applyCouponHandler);
+app.post('/api/apply-coupon', applyCouponHandler);
+
 // -------------------- SERVER START --------------------
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log('Server running on port 5000 🚀');
+  console.log(`Server running on port ${PORT} 🚀`);
 });
